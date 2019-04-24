@@ -13,12 +13,12 @@ const switchcase = cases => defaultCase => key =>
   cases.hasOwnProperty(key) ? cases[key] : defaultCase;
 
 const unitLookup = switchcase({
-    'gal': 'L',
-    'L': 'gal',
-    'lbs': 'Kg',
-    'Kg': 'lbs',
-    'mi': 'Km',
-    'Km': 'mi'
+    'gal': 'l',
+    'l': 'gal',
+    'lbs': 'kg',
+    'kg': 'lbs',
+    'mi': 'km',
+    'km': 'mi'
   })(INVALID_UNIT)
 
 function ConvertHandler() {
@@ -28,7 +28,19 @@ function ConvertHandler() {
     //look for any alphabet character
     var regex = /[a-zA-Z]/g;
     
-    result = input.substr(0, input.search(regex));
+    result = INVALID_NUM;
+    var temp = input.substr(0, input.search(regex));
+    if (temp.length == 0) temp="1";
+    var count = (temp.match(/\//g) || []).length;
+    
+    if (count < 2) {
+      try {
+        result = eval(temp);
+      }
+      catch(e) {
+        console.log("Eval Error: " + e);
+      }
+    }
     
     return result;
   };
@@ -46,7 +58,7 @@ function ConvertHandler() {
   this.getReturnUnit = function(initUnit) {
     var result;
     
-    result = unitLookup(initUnit);
+    result = unitLookup(initUnit.toLowerCase());
     
     return result;
   };
@@ -54,23 +66,23 @@ function ConvertHandler() {
   this.spellOutUnit = function(unit) {
     var result;
     
-    switch(unit) {
+    switch(unit.toLowerCase()) {
       case "mi":
         result = "miles";
         break;
       case "gal":
         result ="gallons";
         break;
-      case "L":
+      case "l":
         result = "litres";
         break;
       case "lbs":
         result = "pounds";
         break;
-      case "Kg":
+      case "kg":
         result = "kilograms";
         break;
-      case "Km":
+      case "km":
         result = "kilometres";
         break;
       default:
@@ -108,11 +120,11 @@ function ConvertHandler() {
         result = initNum / miToKm;
         break;
       default:
-        result = INVALID_UNIT; 
+        return INVALID_UNIT; 
         break;
     }
     
-    return result;
+    return +result.toFixed(5);
   };
   
   this.getString = function(initNum, initUnit, returnNum, returnUnit) {
@@ -122,7 +134,7 @@ function ConvertHandler() {
     else if (returnNum == INVALID_NUM) result = returnNum;
     else if (returnUnit == INVALID_UNIT) result = returnNum;
     else {
-      result = `initNum: ${initNum}, initUnit: '${initUnit}', returnNum: ${returnNum}, returnUnit: '${returnUnit}', string: '${initNum} ${this.spellOutUnit(initUnit)} converts to ${returnNum} ${this.spellOutUnit(returnUnit)}'`; 
+      result = {initNum:initNum, initUnit:initUnit, returnNum:returnNum, returnUnit:returnUnit, string:`${initNum}${this.spellOutUnit(initUnit)} converts to ${returnNum}${this.spellOutUnit(returnUnit)}`}; 
     }
     
     return result;
